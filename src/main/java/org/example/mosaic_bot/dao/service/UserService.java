@@ -17,5 +17,5 @@ public interface UserService {
 
     UserDTO setUserStatus(Long chatId, UserStatus userStatus);
 
-    UserDTO setUserAdminRole(Long chatId, String adminName, String adminPassword) throws NotExistsUserException;
+    UserDTO setUserAdminRole(Long chatId, String adminName) throws NotExistsUserException;
 }

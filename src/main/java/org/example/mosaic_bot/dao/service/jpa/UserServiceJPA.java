@@ -12,6 +12,7 @@ import org.example.mosaic_bot.exceptions.NotExistsUserException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -59,17 +60,18 @@ public class UserServiceJPA implements UserService {
     }
 
     @Override
-    public UserDTO setUserAdminRole(Long chatId, String adminName, String adminPassword) throws NotExistsUserException, NotExistsAdminException {
+    public UserDTO setUserAdminRole(Long chatId, String adminName) throws NotExistsUserException {
         Optional<User> user = userRepository.findById(chatId);
-        Admin admin = adminRepository.getAdminByNameAndPassword(adminName, adminPassword);
+        List<Admin> admin = adminRepository.findByNameIs(adminName);
         if (user.isEmpty()) {
             throw new NotExistsUserException(chatId);
         }
-        if (admin == null) {
+        if (admin.isEmpty()) {
             throw new NotExistsAdminException(chatId);
         }
-        user.get().setAdmin(admin);
+        user.get().setAdmin(admin.get(0));
         userRepository.save(user.get());
         return user.get().convertToDTO();
     }
+
 }

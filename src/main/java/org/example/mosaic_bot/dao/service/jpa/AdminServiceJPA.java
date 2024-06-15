@@ -55,6 +55,16 @@ public class AdminServiceJPA implements AdminService {
 
     @Override
     @Transactional
+    public Optional<AdminDTO> getAdminByName(String name) {
+        List<Admin> admins = adminRepository.findByNameIs(name);
+        if (admins.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(admins.get(0).convertToDTO());
+    }
+
+    @Override
+    @Transactional
     public List<AdminDTO> getAdmins() {
         List<AdminDTO> allAdmins = new ArrayList<>();
         adminRepository.findAll().forEach(admin -> allAdmins.add(admin.convertToDTO()));

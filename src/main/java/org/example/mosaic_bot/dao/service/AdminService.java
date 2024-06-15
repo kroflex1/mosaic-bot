@@ -10,6 +10,7 @@ public interface AdminService {
     AdminDTO registerAdmin(String name, String password) throws AlreadyExistsAdminException;
 
     Optional<AdminDTO> getAdminById(Long adminId);
+    Optional<AdminDTO> getAdminByName(String adminName);
 
     Optional<AdminDTO> getAdminByNameAndPassword(String name, String password);
 

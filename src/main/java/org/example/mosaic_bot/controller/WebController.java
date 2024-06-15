@@ -8,9 +8,9 @@ import lombok.Setter;
 import org.example.mosaic_bot.dao.dto.AdminDTO;
 import org.example.mosaic_bot.dao.service.AdminService;
 import org.example.mosaic_bot.exceptions.AlreadyExistsAdminException;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,18 +23,16 @@ import java.util.Optional;
 @RestController()
 public class WebController {
     private final AdminService adminService;
-    private final PasswordEncoder passwordEncoder;
 
-    public WebController(AdminService adminService, PasswordEncoder passwordEncoder) {
+    public WebController(AdminService adminService) {
         this.adminService = adminService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping(value = "/admins/register")
     @Operation(summary = "Зарегестрировать нового админа")
     public ResponseEntity<String> createAdmin(@RequestBody Admin admin) {
         try {
-            String hashedPassword = passwordEncoder.encode(admin.getPassword());
+            String hashedPassword = BCrypt.hashpw(admin.getPassword(), BCrypt.gensalt());
             adminService.registerAdmin(admin.getName(), hashedPassword);
         } catch (AlreadyExistsAdminException e) {
             return  ResponseEntity.status(HttpStatus.CONFLICT).body("Админ с таким именем уже существует");

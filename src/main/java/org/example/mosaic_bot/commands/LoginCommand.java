@@ -8,7 +8,7 @@ import org.example.mosaic_bot.dao.entity.UserStatus;
 import org.example.mosaic_bot.dao.service.AdminService;
 import org.example.mosaic_bot.dao.service.UserService;
 import org.example.mosaic_bot.util.Emoji;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +19,10 @@ public class LoginCommand extends MultiStepCommand {
     private static final Set<UserStatus> SUPPORTED_STATUSES = Set.of(UserStatus.WRITE_LOGIN, UserStatus.WRITE_PASSWORD);
     private static final Map<Long, String> AUTH_PROCESS = new HashMap<>();
     private final AdminService adminService;
-    private final PasswordEncoder passwordEncoder;
 
-    public LoginCommand(UserService userService, AdminService adminService, PasswordEncoder passwordEncoder) {
+    public LoginCommand(UserService userService, AdminService adminService) {
         super(userService);
         this.adminService = adminService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -54,7 +52,7 @@ public class LoginCommand extends MultiStepCommand {
                 String name = AUTH_PROCESS.get(chatId);
                 userService.setUserStatus(chatId, UserStatus.CHILLING);
                 if (isValidAuthData(name, password)) {
-                    userService.setUserAdminRole(chatId, name, password);
+                    userService.setUserAdminRole(chatId, name);
                     return new SendMessage(chatId, "%sВы успешно вошли в аккаунт, теперь вы можете сгенерировать коды с помощью /generate_codes".formatted(Emoji.TICK.getCode()));
                 }
                 return new SendMessage(chatId, "%sЛоигн или пароль неверный, попробуйте войти ещё раз /login".formatted(Emoji.CROSS.getCode()));
@@ -68,8 +66,10 @@ public class LoginCommand extends MultiStepCommand {
     }
 
     private boolean isValidAuthData(String adminName, String adminPassword) {
-        String hashedPassword = passwordEncoder.encode(adminPassword);
-        Optional<AdminDTO> admin = adminService.getAdminByNameAndPassword(adminName, hashedPassword);
-        return admin.isPresent();
+        Optional<AdminDTO> adminDTO = adminService.getAdminByName(adminName);
+        if (adminDTO.isEmpty()) {
+            return false;
+        }
+        return BCrypt.checkpw(adminPassword, adminDTO.get().getPassword());
     }
 }

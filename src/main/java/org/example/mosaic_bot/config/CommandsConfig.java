@@ -9,7 +9,6 @@ import org.example.mosaic_bot.dao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +18,10 @@ import java.util.stream.Collectors;
 public class CommandsConfig {
     private final UserService userService;
     private final AdminService adminService;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public CommandsConfig(UserService userService, AdminService adminService, PasswordEncoder passwordEncoder) {
+    public CommandsConfig(UserService userService, AdminService adminService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.adminService = adminService;
     }
 
@@ -32,7 +29,7 @@ public class CommandsConfig {
     public List<Command> allCommands() {
         List<Command> availableCommands = new ArrayList<>();
         availableCommands.add(new StartCommand(userService));
-        availableCommands.add(new LoginCommand(userService, adminService, passwordEncoder));
+        availableCommands.add(new LoginCommand(userService, adminService));
         Command helpCommand = new HelpCommand(userService, availableCommands.stream().map(Command::toApiCommand).collect(Collectors.toList()));
         availableCommands.add(helpCommand);
         return availableCommands;
