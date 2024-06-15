@@ -2,6 +2,7 @@ package org.example.mosaic_bot.commands;
 
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.mosaic_bot.dao.service.UserService;
 
@@ -16,7 +17,7 @@ public abstract class Command {
 
     public abstract String description();
 
-    public abstract SendMessage handle(Update update);
+    public abstract AbstractSendRequest handle(Update update);
 
     public boolean isSupport(Update update) {
         return update.message() != null && update.message().text().equals(command());

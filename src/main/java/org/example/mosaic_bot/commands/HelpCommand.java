@@ -2,6 +2,7 @@ package org.example.mosaic_bot.commands;
 
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.mosaic_bot.dao.service.UserService;
 
@@ -26,7 +27,7 @@ public class HelpCommand extends Command {
     }
 
     @Override
-    public SendMessage handle(Update update) {
+    public AbstractSendRequest handle(Update update) {
         StringBuilder result = new StringBuilder("%s - %s".formatted(command(), description()));
         for (BotCommand command : availableCommands) {
             result.append("%s - %s".formatted(command.command(), command.description())).append("\n");

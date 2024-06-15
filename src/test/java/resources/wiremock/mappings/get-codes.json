@@ -1,0 +1,13 @@
+{
+	"request": {
+		"urlPathPattern": "/api/v1/code",
+		"method": "POST"
+	},
+	"response": {
+		"status": 200,
+		"headers": {
+			"Content-Type": "text/plain"
+		},
+		"body": "{\"codes\":[{\"id\": \"b1\",\"usage\": 1}, {\"id\": \"b2\",\"usage\": 1}, {\"id\": \"b3\",\"usage\": 1}]}"
+	}
+}

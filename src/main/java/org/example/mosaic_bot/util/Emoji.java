@@ -4,7 +4,8 @@ public enum Emoji {
     WAVING_HAND("\uD83D\uDC4B"),
     PERSON("\uD83D\uDE4D\u200D♂\uFE0F"),
     TICK("✅"),
-    CROSS("❌");
+    CROSS("❌"),
+    EXCLAMATION_MARK("❗\uFE0F");
     private final String emojiCode;
 
     Emoji(String emojiCode) {

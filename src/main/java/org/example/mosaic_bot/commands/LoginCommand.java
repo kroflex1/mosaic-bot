@@ -2,6 +2,7 @@ package org.example.mosaic_bot.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
+import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.mosaic_bot.dao.dto.AdminDTO;
 import org.example.mosaic_bot.dao.entity.UserStatus;
@@ -36,7 +37,7 @@ public class LoginCommand extends MultiStepCommand {
     }
 
     @Override
-    public SendMessage handle(Update update) {
+    public AbstractSendRequest handle(Update update) {
         Long chatId = getChatId(update);
         UserStatus userStatus = userService.getUserById(chatId).get().getStatus();
         switch (userStatus) {

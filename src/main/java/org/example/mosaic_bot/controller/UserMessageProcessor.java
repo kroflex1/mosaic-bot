@@ -1,6 +1,7 @@
 package org.example.mosaic_bot.controller;
 
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.mosaic_bot.commands.Command;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ public class UserMessageProcessor {
         this.commands = commands;
     }
 
-    public SendMessage process(Update update) {
+    public AbstractSendRequest process(Update update) {
         for (Command command : commands) {
             if (command.isSupport(update)) {
                 return command.handle(update);

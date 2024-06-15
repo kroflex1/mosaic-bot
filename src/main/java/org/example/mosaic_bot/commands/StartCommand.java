@@ -1,6 +1,7 @@
 package org.example.mosaic_bot.commands;
 
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.mosaic_bot.dao.dto.UserDTO;
 import org.example.mosaic_bot.dao.service.UserService;
@@ -24,7 +25,7 @@ public class StartCommand extends Command {
     }
 
     @Override
-    public SendMessage handle(Update update) {
+    public AbstractSendRequest handle(Update update) {
         Long chatId = getChatId(update);
         Optional<UserDTO> userDTO = userService.getUserById(chatId);
         if (userDTO.isEmpty()) {

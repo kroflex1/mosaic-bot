@@ -21,7 +21,7 @@ public class User {
     private Long chatId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "team_lead_id")
+    @JoinColumn(name = "adminRole")
     private Admin admin;
 
     @Enumerated(EnumType.STRING)
