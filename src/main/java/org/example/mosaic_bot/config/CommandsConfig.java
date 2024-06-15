@@ -1,11 +1,13 @@
 package org.example.mosaic_bot.config;
 
 import org.example.mosaic_bot.codeGenerator.CodeGenerator;
+import org.example.mosaic_bot.codeGenerator.HttpCodeGenerator;
 import org.example.mosaic_bot.codeGenerator.InMemoryCodeGenerator;
 import org.example.mosaic_bot.commands.*;
 import org.example.mosaic_bot.dao.service.AdminService;
 import org.example.mosaic_bot.dao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +17,8 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class CommandsConfig {
+    @Value("${app.code-generator-url}")
+    private String baseUrlForCodeGeneratorService;
     private final UserService userService;
     private final AdminService adminService;
     private final CodeGenerator codeGenerator;
@@ -23,7 +27,7 @@ public class CommandsConfig {
     public CommandsConfig(UserService userService, AdminService adminService) {
         this.userService = userService;
         this.adminService = adminService;
-        this.codeGenerator = new InMemoryCodeGenerator();
+        this.codeGenerator = new HttpCodeGenerator(baseUrlForCodeGeneratorService);
     }
 
     @Bean

@@ -1,14 +1,16 @@
 package org.example.mosaic_bot.codeGenerator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCodeGenerator implements CodeGenerator {
@@ -25,10 +27,19 @@ public class HttpCodeGenerator implements CodeGenerator {
 
     @Override
     public File generateFileWithCodes(int numberOfCodes, int numberOfCodeReuse) {
-        return null;
+        List<String> codes = getCodes(numberOfCodes, numberOfCodeReuse);
+        File file = null;
+        try {
+            file = File.createTempFile("codes", ".txt");
+            FileWriter writer = new FileWriter(file);
+            writer.write(String.join("\n", codes));
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 
-    @SneakyThrows
     public List<String> getCodes(int numberOfCodes, int numberOfCodeReuse) {
         CodesRequest body = new CodesRequest(numberOfCodes, numberOfCodeReuse);
         String response = webClient
@@ -40,16 +51,22 @@ public class HttpCodeGenerator implements CodeGenerator {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
-        JsonNode node = OBJECT_MAPPER.readTree(response);
-        var x = node.get("codes").toString();
-        List<CodeInf> codesInf = OBJECT_MAPPER.readValue(x, new TypeReference<>() {});
+        JsonNode node;
+        List<CodeInf> codesInf;
+        try {
+            node = OBJECT_MAPPER.readTree(response);
+            codesInf = OBJECT_MAPPER.readValue(node.get("codes").toString(), new TypeReference<>() {
+            });
+        } catch (JsonProcessingException e) {
+            return new ArrayList<>();
+        }
         return codesInf.stream().map(CodeInf::id).collect(Collectors.toList());
     }
 
     private record CodesRequest(int count, int usage) {
     }
 
-    private record CodeInf(String id, int usage){
+    private record CodeInf(String id, int usage) {
 
     }
 }
