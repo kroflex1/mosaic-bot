@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: "MosaicBot"
+  liquibase:
+    enabled: false
+  datasource:
+    driver: "org.postgresql.Driver"
+    url: "jdbc:postgresql://localhost:5432/mosaic"
+    username: "postgres"
+    password: "postgres"
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+    hibernate:
+      ddl-auto: "update"
+
+app:
+  telegram-token: ""
+  code-generator-url: "http://"
