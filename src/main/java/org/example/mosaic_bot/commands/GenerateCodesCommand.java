@@ -5,11 +5,11 @@ import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.example.mosaic_bot.codeGenerator.CodeGenerator;
-import org.example.mosaic_bot.dao.dto.UserDTO;
-import org.example.mosaic_bot.dao.entity.UserStatus;
-import org.example.mosaic_bot.dao.service.UserService;
+import org.example.mosaic_bot.dao.dto.TelegramUserDTO;
+import org.example.mosaic_bot.dao.entity.TelegramUserStatus;
+import org.example.mosaic_bot.dao.service.TelegramUserService;
 import org.example.mosaic_bot.util.Emoji;
+import org.example.mosaic_bot.web.MosaicWeb;
 
 import java.io.File;
 import java.util.HashMap;
@@ -17,13 +17,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class GenerateCodesCommand extends MultiStepCommand {
-    private static final Set<UserStatus> SUPPORTED_STATUSES = Set.of(UserStatus.WRITE_NUMBER_OF_CODES, UserStatus.WRITE_NUMBER_OF_REUSE);
+    private static final Set<TelegramUserStatus> SUPPORTED_STATUSES = Set.of(TelegramUserStatus.WRITE_NUMBER_OF_CODES, TelegramUserStatus.WRITE_NUMBER_OF_REUSE);
     private static final Map<Long, Integer> CODES_GENERATE_PROCESS = new HashMap<>();
-    private final CodeGenerator codeGenerator;
+    private final MosaicWeb mosaicWeb;
 
-    public GenerateCodesCommand(UserService userService, CodeGenerator codeGenerator) {
-        super(userService);
-        this.codeGenerator = codeGenerator;
+    public GenerateCodesCommand(TelegramUserService telegramUserService, MosaicWeb mosaicWeb) {
+        super(telegramUserService);
+        this.mosaicWeb = mosaicWeb;
     }
 
     @Override
@@ -39,14 +39,14 @@ public class GenerateCodesCommand extends MultiStepCommand {
     @Override
     public AbstractSendRequest handle(Update update) {
         Long chatId = getChatId(update);
-        UserDTO userDTO = userService.getUserById(chatId).get();
-        UserStatus userStatus = userDTO.getStatus();
-        switch (userStatus) {
+        TelegramUserDTO telegramUserDTO = telegramUserService.getUserById(chatId).get();
+        TelegramUserStatus telegramUserStatus = telegramUserDTO.getStatus();
+        switch (telegramUserStatus) {
             case CHILLING:
-                if (userDTO.getAdmin() == null) {
+                if (telegramUserDTO.getAdmin() == null) {
                     return new SendMessage(chatId, "%sВы должны войти в аккаунт с помощью /login, чтобы получить возможность генерировать коды".formatted(Emoji.EXCLAMATION_MARK.getCode()));
                 }
-                userService.setUserStatus(chatId, UserStatus.WRITE_NUMBER_OF_CODES);
+                telegramUserService.setUserStatus(chatId, TelegramUserStatus.WRITE_NUMBER_OF_CODES);
                 return new SendMessage(chatId, "*Введите количество кодов, которые вы хотите сгенерировать:*").parseMode(ParseMode.Markdown);
             case WRITE_NUMBER_OF_CODES:
                 Integer numberOfCodes;
@@ -59,7 +59,7 @@ public class GenerateCodesCommand extends MultiStepCommand {
                     return new SendMessage(chatId, "%sЧисло кодов должно быть больше 0, попробуйте ввести количество кодов ещё раз".formatted(Emoji.EXCLAMATION_MARK.getCode()));
                 }
                 CODES_GENERATE_PROCESS.put(chatId, numberOfCodes);
-                userService.setUserStatus(chatId, UserStatus.WRITE_NUMBER_OF_REUSE);
+                telegramUserService.setUserStatus(chatId, TelegramUserStatus.WRITE_NUMBER_OF_REUSE);
                 return new SendMessage(chatId, "*Введите количество переиспользований для кода:*").parseMode(ParseMode.Markdown);
             case WRITE_NUMBER_OF_REUSE:
                 Integer numberOfReuse;
@@ -71,8 +71,8 @@ public class GenerateCodesCommand extends MultiStepCommand {
                 if (numberOfReuse < 0) {
                     return new SendMessage(chatId, "%sЧисло кодов должно быть больше 0, попробуйте ввести количество переиспользований ещё раз".formatted(Emoji.EXCLAMATION_MARK.getCode()));
                 }
-                userService.setUserStatus(chatId, UserStatus.CHILLING);
-                File file = codeGenerator.generateFileWithCodes(CODES_GENERATE_PROCESS.get(chatId), numberOfReuse);
+                telegramUserService.setUserStatus(chatId, TelegramUserStatus.CHILLING);
+                File file = mosaicWeb.generateFileWithCodes(CODES_GENERATE_PROCESS.get(chatId), numberOfReuse);
                 return new SendDocument(chatId, file);
 
         }
@@ -80,7 +80,7 @@ public class GenerateCodesCommand extends MultiStepCommand {
     }
 
     @Override
-    protected Set<UserStatus> getSupportedStatuses() {
+    protected Set<TelegramUserStatus> getSupportedStatuses() {
         return SUPPORTED_STATUSES;
     }
 

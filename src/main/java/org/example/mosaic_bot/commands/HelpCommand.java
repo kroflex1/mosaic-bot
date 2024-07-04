@@ -4,15 +4,15 @@ import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.example.mosaic_bot.dao.service.UserService;
+import org.example.mosaic_bot.dao.service.TelegramUserService;
 
 import java.util.List;
 
 public class HelpCommand extends Command {
     private final List<BotCommand> availableCommands;
 
-    public HelpCommand(UserService userService, List<BotCommand> availableCommands) {
-        super(userService);
+    public HelpCommand(TelegramUserService telegramUserService, List<BotCommand> availableCommands) {
+        super(telegramUserService);
         this.availableCommands = availableCommands;
     }
 

@@ -1,19 +1,19 @@
 package org.example.mosaic_bot.commands;
 
 import com.pengrad.telegrambot.model.Update;
-import org.example.mosaic_bot.dao.dto.UserDTO;
-import org.example.mosaic_bot.dao.entity.UserStatus;
-import org.example.mosaic_bot.dao.service.UserService;
+import org.example.mosaic_bot.dao.dto.TelegramUserDTO;
+import org.example.mosaic_bot.dao.entity.TelegramUserStatus;
+import org.example.mosaic_bot.dao.service.TelegramUserService;
 
 import java.util.Optional;
 import java.util.Set;
 
 public abstract class MultiStepCommand extends Command {
-    public MultiStepCommand(UserService userService) {
-        super(userService);
+    public MultiStepCommand(TelegramUserService telegramUserService) {
+        super(telegramUserService);
     }
 
-    protected abstract Set<UserStatus> getSupportedStatuses();
+    protected abstract Set<TelegramUserStatus> getSupportedStatuses();
 
     @Override
     public boolean isSupport(Update update) {
@@ -23,14 +23,14 @@ public abstract class MultiStepCommand extends Command {
         } else {
             chatId = update.message().chat().id();
         }
-        Optional<UserDTO> userDTO = userService.getUserById(chatId);
+        Optional<TelegramUserDTO> userDTO = telegramUserService.getUserById(chatId);
         if (userDTO.isEmpty()) {
-            userService.registerUser(chatId);
-            userDTO = userService.getUserById(chatId);
+            telegramUserService.registerUser(chatId);
+            userDTO = telegramUserService.getUserById(chatId);
         }
-        if (userDTO.get().getStatus().equals(UserStatus.CHILLING) && update.message() != null && update.message().text().equals(command())) {
+        if (userDTO.get().getStatus().equals(TelegramUserStatus.CHILLING) && update.message() != null && update.message().text().equals(command())) {
             return true;
-        } else if (!userDTO.get().getStatus().equals(UserStatus.CHILLING) && update.message() != null && isCommand(update.message().text())) {
+        } else if (!userDTO.get().getStatus().equals(TelegramUserStatus.CHILLING) && update.message() != null && isCommand(update.message().text())) {
             return false;
         }
         return getSupportedStatuses().contains(userDTO.get().getStatus());

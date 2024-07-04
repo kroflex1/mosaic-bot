@@ -4,11 +4,12 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.example.mosaic_bot.dao.dto.AdminDTO;
-import org.example.mosaic_bot.dao.entity.UserStatus;
+import org.example.mosaic_bot.dao.dto.UserDTO;
+import org.example.mosaic_bot.dao.entity.TelegramUserStatus;
 import org.example.mosaic_bot.dao.service.AdminService;
-import org.example.mosaic_bot.dao.service.UserService;
+import org.example.mosaic_bot.dao.service.TelegramUserService;
 import org.example.mosaic_bot.util.Emoji;
+import org.example.mosaic_bot.web.MosaicWeb;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.HashMap;
@@ -17,13 +18,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public class LoginCommand extends MultiStepCommand {
-    private static final Set<UserStatus> SUPPORTED_STATUSES = Set.of(UserStatus.WRITE_LOGIN, UserStatus.WRITE_PASSWORD);
+    private static final Set<TelegramUserStatus> SUPPORTED_STATUSES = Set.of(TelegramUserStatus.WRITE_LOGIN, TelegramUserStatus.WRITE_PASSWORD);
     private static final Map<Long, String> AUTH_PROCESS = new HashMap<>();
-    private final AdminService adminService;
+    private final MosaicWeb mosaicWeb;
 
-    public LoginCommand(UserService userService, AdminService adminService) {
-        super(userService);
-        this.adminService = adminService;
+    public LoginCommand(TelegramUserService telegramUserService, MosaicWeb mosaicWeb) {
+        super(telegramUserService);
+        this.mosaicWeb = mosaicWeb;
     }
 
     @Override
@@ -39,21 +40,21 @@ public class LoginCommand extends MultiStepCommand {
     @Override
     public AbstractSendRequest handle(Update update) {
         Long chatId = getChatId(update);
-        UserStatus userStatus = userService.getUserById(chatId).get().getStatus();
+        TelegramUserStatus userStatus = telegramUserService.getUserById(chatId).get().getStatus();
         switch (userStatus) {
             case CHILLING:
-                userService.setUserStatus(chatId, UserStatus.WRITE_LOGIN);
+                telegramUserService.setUserStatus(chatId, TelegramUserStatus.WRITE_LOGIN);
                 return new SendMessage(chatId, "*Введите логин:*").parseMode(ParseMode.Markdown);
             case WRITE_LOGIN:
                 AUTH_PROCESS.put(chatId, update.message().text());
-                userService.setUserStatus(chatId, UserStatus.WRITE_PASSWORD);
+                telegramUserService.setUserStatus(chatId, TelegramUserStatus.WRITE_PASSWORD);
                 return new SendMessage(chatId, "*Введите пароль:*").parseMode(ParseMode.Markdown);
             case WRITE_PASSWORD:
                 String password = update.message().text();
                 String name = AUTH_PROCESS.get(chatId);
-                userService.setUserStatus(chatId, UserStatus.CHILLING);
+                telegramUserService.setUserStatus(chatId, TelegramUserStatus.CHILLING);
                 if (isValidAuthData(name, password)) {
-                    userService.setUserAdminRole(chatId, name);
+                    telegramUserService.setUserAdminRole(chatId, name);
                     return new SendMessage(chatId, "%sВы успешно вошли в аккаунт, теперь вы можете сгенерировать коды с помощью /generate_codes".formatted(Emoji.TICK.getCode()));
                 }
                 return new SendMessage(chatId, "%sЛоигн или пароль неверный, попробуйте войти ещё раз /login".formatted(Emoji.CROSS.getCode()));
@@ -62,12 +63,12 @@ public class LoginCommand extends MultiStepCommand {
     }
 
     @Override
-    protected Set<UserStatus> getSupportedStatuses() {
+    protected Set<TelegramUserStatus> getSupportedStatuses() {
         return SUPPORTED_STATUSES;
     }
 
     private boolean isValidAuthData(String adminName, String adminPassword) {
-        Optional<AdminDTO> adminDTO = adminService.getAdminByName(adminName);
+        Optional<UserDTO> accessToken = adminService.getAdminByName(adminName);
         if (adminDTO.isEmpty()) {
             return false;
         }

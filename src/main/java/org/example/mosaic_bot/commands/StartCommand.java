@@ -3,15 +3,15 @@ package org.example.mosaic_bot.commands;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.example.mosaic_bot.dao.dto.UserDTO;
-import org.example.mosaic_bot.dao.service.UserService;
+import org.example.mosaic_bot.dao.dto.TelegramUserDTO;
+import org.example.mosaic_bot.dao.service.TelegramUserService;
 import org.example.mosaic_bot.util.Emoji;
 
 import java.util.Optional;
 
 public class StartCommand extends Command {
-    public StartCommand(UserService userService) {
-        super(userService);
+    public StartCommand(TelegramUserService telegramUserService) {
+        super(telegramUserService);
     }
 
     @Override
@@ -27,9 +27,9 @@ public class StartCommand extends Command {
     @Override
     public AbstractSendRequest handle(Update update) {
         Long chatId = getChatId(update);
-        Optional<UserDTO> userDTO = userService.getUserById(chatId);
+        Optional<TelegramUserDTO> userDTO = telegramUserService.getUserById(chatId);
         if (userDTO.isEmpty()) {
-            userService.registerUser(chatId);
+            telegramUserService.registerUser(chatId);
             return new SendMessage(chatId, "%sПривет, перед началом работы с ботом вы должны авторизоваться с помощью команды /login".formatted(Emoji.WAVING_HAND.getCode()));
         }
         return new SendMessage(chatId, "%sВы уже пользуетесь данным ботом, используйте /help, чтобы получить список доступных команд".formatted(Emoji.WAVING_HAND.getCode()));

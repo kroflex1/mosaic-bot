@@ -3,14 +3,13 @@ package org.example.mosaic_bot.commands;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.AbstractSendRequest;
-import com.pengrad.telegrambot.request.SendMessage;
-import org.example.mosaic_bot.dao.service.UserService;
+import org.example.mosaic_bot.dao.service.TelegramUserService;
 
 public abstract class Command {
-    protected final UserService userService;
+    protected final TelegramUserService telegramUserService;
 
-    public Command(UserService userService) {
-        this.userService = userService;
+    public Command(TelegramUserService telegramUserService) {
+        this.telegramUserService = telegramUserService;
     }
 
     public abstract String command();

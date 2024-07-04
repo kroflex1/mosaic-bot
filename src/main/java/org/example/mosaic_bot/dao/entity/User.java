@@ -4,45 +4,44 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.mosaic_bot.dao.dto.AdminDTO;
 import org.example.mosaic_bot.dao.dto.UserDTO;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
-@Table(name = "activeChats")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
 public class User {
     @Id
-    @Column(name = "chatId")
-    private Long chatId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false)
+    private UUID id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "adminRole")
-    private Admin admin;
+    @Column(name = "username")
+    private String username;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private UserStatus status;
+    @Column(name="email")
+    private String email;
 
-    public User(Long chatId) {
-        this.chatId = chatId;
-        this.status = UserStatus.CHILLING;
-    }
+    @Column(name="hashed_password")
+    private String hashedPassword;
 
-    public UserDTO convertToDTO() {
-        AdminDTO adminDTO = admin == null ? null : admin.convertToDTO();
-        return new UserDTO(chatId, adminDTO, status);
-    }
+    @Column(name="registered_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime registeredAt;
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "(" +
-                "chatId = " + chatId + ", " +
-                "admin = " + admin + ")";
+    @Column(name="role")
+    private String role;
+
+    @Column(name="is_verified")
+    private Boolean is_verified;
+
+    public UserDTO convertToDTO(){
+        return new UserDTO(id, username, hashedPassword);
     }
 
     @Override
@@ -58,8 +57,8 @@ public class User {
         if (thisEffectiveClass != oEffectiveClass) {
             return false;
         }
-        User that = (User) o;
-        return getChatId() != null && Objects.equals(getChatId(), that.getChatId());
+        User user = (User) o;
+        return getId() != null && Objects.equals(getId(), user.getId());
     }
 
     @Override

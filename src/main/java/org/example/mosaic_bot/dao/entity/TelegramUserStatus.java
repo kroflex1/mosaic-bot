@@ -1,6 +1,6 @@
 package org.example.mosaic_bot.dao.entity;
 
-public enum UserStatus {
+public enum TelegramUserStatus {
     CHILLING,
     WRITE_LOGIN,
     WRITE_PASSWORD,
