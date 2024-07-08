@@ -5,7 +5,7 @@ spring:
     enabled: false
   datasource:
     driver: "org.postgresql.Driver"
-    url: "jdbc:postgresql://80.87.105.76:3030/app"
+    url: "jdbc:postgresql://db/app"
     username: "agent"
     password: "agent"
   jpa:
@@ -17,6 +17,6 @@ spring:
 
 app:
   telegram-token: "7043737603:AAHuUK8KyQQ6QX-hs_7TT5ESd4e4sF3zCZA"
-  code-generator-url: "http://80.87.105.76:1323"
+  code-generator-url: "app"
   admin-login: "admin@admin.com"
   admin-password: "admin"
