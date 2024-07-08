@@ -4,15 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.resolver.DefaultAddressResolverGroup;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.mosaic_bot.exceptions.CantConnectToServerException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
@@ -53,17 +57,21 @@ public class MosaicWeb {
     }
 
     public List<String> getCodes(int numberOfCodes, int numberOfCodeReuse) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer %s".formatted(getAccessToken(adminLogin, adminPassword).get()));
+        headers.add("User-Agent", "TelegramBot");
+        headers.add("Accept", "*/*");
         WebClient webClient = org.springframework.web.reactive.function.client.WebClient
                 .builder()
+                .defaultHeaders(httpHeaders -> httpHeaders.addAll(headers))
                 .baseUrl(baseUrl)
                 .build();
-        CodesRequest body = new CodesRequest(numberOfCodes, numberOfCodeReuse);
         String response = webClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
                         .path(CODES_PATH)
                         .build())
-                .bodyValue(body)
+                .bodyValue(new CodesRequest(numberOfCodes, numberOfCodeReuse))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, clientResponse -> Mono.empty())
                 .bodyToMono(String.class)
@@ -85,40 +93,57 @@ public class MosaicWeb {
         return userLoginInf.map(UserLoginInf::getAccess_token);
     }
 
-    private Optional<UserLoginInf> loginToService(String adminLogin, String adminPassword) {
+    public Optional<UserLoginInf> loginToService(String adminLogin, String adminPassword) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-Agent", "TelegramBot");
+        headers.add("Accept", "*/*");
         WebClient webClient = org.springframework.web.reactive.function.client.WebClient
                 .builder()
+                .defaultHeaders(httpHeaders -> httpHeaders.addAll(headers))
                 .baseUrl(baseUrl)
                 .build();
-        ResponseEntity<UserLoginInf> userLoginInf = webClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path(LOGIN_PATH)
-                        .build())
-                .bodyValue(new LoginRequest(adminLogin, adminPassword))
-                .retrieve()
-                .toEntity(UserLoginInf.class)
-                .block();
-        if (userLoginInf.getStatusCode().isError()) {
-            return Optional.empty();
+        UserLoginInf userLoginInf;
+        try {
+            userLoginInf = webClient
+                    .post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(LOGIN_PATH)
+                            .build())
+                    .bodyValue(new LoginRequest(adminLogin, adminPassword))
+                    .retrieve()
+                    .bodyToMono(UserLoginInf.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode().value() == 401) {
+                return Optional.empty();
+            } else {
+                throw e;
+            }
         }
-        return Optional.of(userLoginInf.getBody());
+        return Optional.of(userLoginInf);
     }
 
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
     @Setter
-    private class UserLoginInf {
+    public static class UserLoginInf {
         private String access_token;
         private String refresh_token;
-        private UserInf userInf;
-
-        private record UserInf(UUID id, String name, String email, String role, String registeredAt) {
-
-        }
+        private UserInf user;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class UserInf {
+        private UUID id;
+        private String name;
+        private String email;
+        private String role;
+        private String registeredAt;
+    }
     private record LoginRequest(String login, String password) {
 
     }

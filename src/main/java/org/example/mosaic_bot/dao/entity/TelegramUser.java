@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.mosaic_bot.dao.dto.UserDTO;
 import org.example.mosaic_bot.dao.dto.TelegramUserDTO;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -20,7 +19,7 @@ public class TelegramUser {
     @Column(name = "chatId", nullable = false)
     private Long chatId;
 
-    @Column(name = "is_admin")
+    @Column(name = "is_admin", nullable = false)
     private Boolean isAdmin;
 
     @Enumerated(EnumType.STRING)
@@ -29,19 +28,18 @@ public class TelegramUser {
 
     public TelegramUser(Long chatId) {
         this.chatId = chatId;
+        this.isAdmin = false;
         this.status = TelegramUserStatus.CHILLING;
     }
 
     public TelegramUserDTO convertToDTO() {
-        UserDTO userDTO = admin == null ? null : admin.convertToDTO();
-        return new TelegramUserDTO(chatId, userDTO, status);
+        return new TelegramUserDTO(chatId, status, isAdmin);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" +
-                "chatId = " + chatId + ", " +
-                "admin = " + admin + ")";
+                "chatId = " + chatId;
     }
 
     @Override

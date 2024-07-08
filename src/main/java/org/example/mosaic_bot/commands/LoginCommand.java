@@ -1,16 +1,14 @@
 package org.example.mosaic_bot.commands;
 
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.AbstractSendRequest;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.example.mosaic_bot.dao.dto.UserDTO;
 import org.example.mosaic_bot.dao.entity.TelegramUserStatus;
-import org.example.mosaic_bot.dao.service.AdminService;
 import org.example.mosaic_bot.dao.service.TelegramUserService;
 import org.example.mosaic_bot.util.Emoji;
 import org.example.mosaic_bot.web.MosaicWeb;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +52,7 @@ public class LoginCommand extends MultiStepCommand {
                 String name = AUTH_PROCESS.get(chatId);
                 telegramUserService.setUserStatus(chatId, TelegramUserStatus.CHILLING);
                 if (isValidAuthData(name, password)) {
-                    telegramUserService.setUserAdminRole(chatId, name);
+                    telegramUserService.setAdminStatus(chatId, true);
                     return new SendMessage(chatId, "%sВы успешно вошли в аккаунт, теперь вы можете сгенерировать коды с помощью /generate_codes".formatted(Emoji.TICK.getCode()));
                 }
                 return new SendMessage(chatId, "%sЛоигн или пароль неверный, попробуйте войти ещё раз /login".formatted(Emoji.CROSS.getCode()));
@@ -68,10 +66,9 @@ public class LoginCommand extends MultiStepCommand {
     }
 
     private boolean isValidAuthData(String adminName, String adminPassword) {
-        Optional<UserDTO> accessToken = adminService.getAdminByName(adminName);
-        if (adminDTO.isEmpty()) {
+        Optional<MosaicWeb.UserLoginInf> user = mosaicWeb.loginToService(adminName, adminPassword);
+        if (user.isEmpty())
             return false;
-        }
-        return BCrypt.checkpw(adminPassword, adminDTO.get().getPassword());
+        return user.get().getUser().getRole().equals("admin");
     }
 }

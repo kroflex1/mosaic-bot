@@ -43,7 +43,7 @@ public class GenerateCodesCommand extends MultiStepCommand {
         TelegramUserStatus telegramUserStatus = telegramUserDTO.getStatus();
         switch (telegramUserStatus) {
             case CHILLING:
-                if (telegramUserDTO.getAdmin() == null) {
+                if (telegramUserDTO.getIsAdmin() == false) {
                     return new SendMessage(chatId, "%sВы должны войти в аккаунт с помощью /login, чтобы получить возможность генерировать коды".formatted(Emoji.EXCLAMATION_MARK.getCode()));
                 }
                 telegramUserService.setUserStatus(chatId, TelegramUserStatus.WRITE_NUMBER_OF_CODES);

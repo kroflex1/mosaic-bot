@@ -16,5 +16,5 @@ public interface TelegramUserService {
 
     TelegramUserDTO setUserStatus(Long chatId, TelegramUserStatus telegramUserStatus);
 
-    TelegramUserDTO setUserAdminRole(Long chatId, UUID adminId) throws NotExistsTelegramUserException;
+    TelegramUserDTO setAdminStatus(Long chatId, Boolean isAdmin);
 }

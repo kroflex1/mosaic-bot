@@ -1,0 +1,13 @@
+{
+  "request": {
+    "urlPathPattern": "/api/v1/auth/login",
+    "method": "POST"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json "
+    },
+    "body": "{\n\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6ImFkbWluIiwidHlwIjoiSldUIn0.eyJpZCI6Ijk5Y2M5MWY1LWI3MzctNDc1Yy1hNWIyLThhYjAxYTc2MzViMiIsIm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6ImFkbWluIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwic3ViIjoiOTljYzkxZjUtYjczNy00NzVjLWE1YjItOGFiMDFhNzYzNWIyIiwiZXhwIjoxNzIwMzQyODM3LCJuYmYiOjE3MjAzNDE5MzcsImlhdCI6MTcyMDM0MTkzNywianRpIjoiMDE0ZDQ4MWYtYjE5NC00ODNlLTkxMDQtYjI3NzdlMzU0ZDkzIn0.a5_9NCs1sDVqH2FBO3ztwgVe1UTqpTw3ew76PmGC17Q\",\n\"refresh_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6ImFkbWluIiwidHlwIjoiSldUIn0.eyJpZCI6Ijk5Y2M5MWY1LWI3MzctNDc1Yy1hNWIyLThhYjAxYTc2MzViMiIsIm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6ImFkbWluIiwidG9rZW5UeXBlIjoicmVmcmVzaCIsInN1YiI6Ijk5Y2M5MWY1LWI3MzctNDc1Yy1hNWIyLThhYjAxYTc2MzViMiIsImV4cCI6MTcyMzAyMDMzNywibmJmIjoxNzIwMzQxOTM3LCJpYXQiOjE3MjAzNDE5MzcsImp0aSI6IjQ2ODNhNzYxLTdmYTItNGFlMS1iZGI4LTRmMGJmZTYzYmM5ZCJ9.J75WcWa5YjJR2LE0WKBiyXbS76sIGFSNijOHB1kiGnI\",\n    \"user\": {\n        \"id\": \"99cc91f5-b737-475c-a5b2-8ab01a7635b2\",\n        \"name\": \"admin\",\n        \"email\": \"admin@admin.com\",\n        \"role\": \"admin\",\n        \"registered_at\": \"1111-11-11T10:11:11.111111Z\"\n    }\n}"
+  }
+}
