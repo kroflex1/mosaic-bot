@@ -31,6 +31,7 @@ public abstract class MultiStepCommand extends Command {
         if (userDTO.get().getStatus().equals(TelegramUserStatus.CHILLING) && update.message() != null && update.message().text().equals(command())) {
             return true;
         } else if (!userDTO.get().getStatus().equals(TelegramUserStatus.CHILLING) && update.message() != null && isCommand(update.message().text())) {
+            telegramUserService.setUserStatus(chatId, TelegramUserStatus.CHILLING);
             return false;
         }
         return getSupportedStatuses().contains(userDTO.get().getStatus());
